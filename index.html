@@ -1,11 +1,685 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FORMA — Modern Living</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #f5f0e8;
+      --sand: #e8dfc9;
+      --clay: #c4a882;
+      --bark: #7a5c3e;
+      --coal: #1c1612;
+      --white: #fdfaf5;
+      --accent: #b85c38;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--coal);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transition: transform 0.15s ease;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--bark);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transition: transform 0.35s ease, width 0.25s, height 0.25s, border-color 0.25s;
+    }
+    .cursor-ring.hover { width: 56px; height: 56px; border-color: var(--accent); }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 60px;
+      background: rgba(245,240,232,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(196,168,130,0.2);
+      transition: padding 0.3s;
+    }
+    nav.scrolled { padding: 16px 60px; }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; letter-spacing: 0.12em;
+      color: var(--coal); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--bark);
+      font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 500; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -3px; left: 0;
+      width: 0; height: 1px; background: var(--accent);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-actions { display: flex; gap: 20px; align-items: center; }
+    .cart-btn {
+      background: var(--coal); color: var(--cream);
+      border: none; padding: 10px 24px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: none; transition: background 0.25s;
+    }
+    .cart-btn:hover { background: var(--accent); }
+    .cart-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent); color: white;
+      width: 18px; height: 18px; border-radius: 50%;
+      font-size: 0.65rem; font-weight: 600;
+      margin-left: 6px;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      padding-top: 80px;
+      overflow: hidden;
+    }
+    .hero-text {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 80px 60px 80px 60px;
+      position: relative;
+    }
+    .hero-eyebrow {
+      font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--clay); margin-bottom: 28px;
+      opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.2rem, 5vw, 5.5rem);
+      line-height: 1.06; color: var(--coal);
+      margin-bottom: 28px;
+      opacity: 0; animation: fadeUp 0.9s 0.4s forwards;
+    }
+    .hero-title em { color: var(--accent); font-style: italic; }
+    .hero-sub {
+      font-size: 1rem; line-height: 1.75; color: var(--bark);
+      max-width: 400px; margin-bottom: 48px;
+      opacity: 0; animation: fadeUp 0.9s 0.6s forwards;
+    }
+    .hero-cta {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp 0.9s 0.8s forwards;
+    }
+    .btn-primary {
+      background: var(--coal); color: var(--cream);
+      border: none; padding: 16px 40px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: none; transition: background 0.25s, transform 0.2s;
+    }
+    .btn-primary:hover { background: var(--accent); transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--coal);
+      border: 1.5px solid var(--clay); padding: 16px 40px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: none; transition: border-color 0.25s, color 0.25s, transform 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    .hero-stats {
+      display: flex; gap: 48px; margin-top: 64px;
+      opacity: 0; animation: fadeUp 0.9s 1s forwards;
+    }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; color: var(--coal);
+    }
+    .stat-label {
+      font-size: 0.72rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--clay); margin-top: 4px;
+    }
+
+    .hero-visual {
+      position: relative; overflow: hidden;
+      background: var(--sand);
+    }
+    .hero-img-wrap {
+      position: absolute; inset: 0;
+      opacity: 0; animation: fadeIn 1.2s 0.5s forwards;
+    }
+    .hero-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: sepia(10%) contrast(1.05);
+    }
+    .hero-badge {
+      position: absolute; bottom: 48px; left: -24px;
+      background: var(--white); padding: 20px 28px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+      opacity: 0; animation: slideIn 0.8s 1.2s forwards;
+    }
+    .hero-badge .badge-label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clay); }
+    .hero-badge .badge-val { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--accent); }
+
+    /* MARQUEE */
+    .marquee-wrap {
+      background: var(--coal); padding: 14px 0; overflow: hidden;
+      border-top: 1px solid rgba(196,168,130,0.2);
+    }
+    .marquee-track {
+      display: flex; gap: 0;
+      animation: marquee 20s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--clay); padding: 0 48px;
+    }
+    .marquee-dot { color: var(--accent); }
+
+    /* FEATURED */
+    .featured {
+      padding: 120px 60px;
+    }
+    .section-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 64px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem); color: var(--coal);
+    }
+    .section-title span { display: block; font-style: italic; color: var(--clay); }
+    .view-all {
+      font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--bark); text-decoration: none; border-bottom: 1px solid var(--clay);
+      padding-bottom: 2px; transition: color 0.2s, border-color 0.2s;
+    }
+    .view-all:hover { color: var(--accent); border-color: var(--accent); }
+
+    .products-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+    }
+
+    .product-card {
+      background: var(--white);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      position: relative; overflow: hidden;
+    }
+    .product-card:hover { transform: translateY(-8px); box-shadow: 0 24px 64px rgba(28,22,18,0.1); }
+    .product-card:first-child { grid-row: span 2; }
+
+    .card-img {
+      overflow: hidden; position: relative;
+      background: var(--sand); aspect-ratio: 3/4;
+    }
+    .product-card:first-child .card-img { height: 100%; aspect-ratio: unset; }
+    .card-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.6s ease, filter 0.4s;
+    }
+    .product-card:hover .card-img img { transform: scale(1.06); filter: contrast(1.05); }
+
+    .card-tag {
+      position: absolute; top: 16px; left: 16px;
+      background: var(--accent); color: white;
+      font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 5px 12px;
+    }
+    .card-wishlist {
+      position: absolute; top: 16px; right: 16px;
+      width: 36px; height: 36px; background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      border: none; cursor: none; opacity: 0;
+      transition: opacity 0.2s; font-size: 1rem;
+    }
+    .product-card:hover .card-wishlist { opacity: 1; }
+    .card-wishlist.active { color: var(--accent); }
+
+    .card-body { padding: 20px 24px 24px; }
+    .card-category { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clay); margin-bottom: 6px; }
+    .card-name {
+      font-family: 'Playfair Display', serif; font-size: 1.15rem;
+      color: var(--coal); margin-bottom: 10px;
+    }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-price { font-size: 1rem; font-weight: 500; color: var(--bark); }
+    .card-price s { color: var(--clay); font-size: 0.85rem; margin-left: 6px; font-weight: 300; }
+    .add-btn {
+      background: var(--coal); color: var(--cream);
+      border: none; padding: 9px 20px;
+      font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: none; transition: background 0.2s;
+    }
+    .add-btn:hover { background: var(--accent); }
+
+    /* BANNER */
+    .banner {
+      margin: 0 60px 120px;
+      background: var(--coal);
+      display: grid; grid-template-columns: 1fr 1fr;
+      overflow: hidden; position: relative;
+    }
+    .banner-text {
+      padding: 80px 64px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .banner-eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--clay); margin-bottom: 20px; }
+    .banner-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3vw, 3.2rem);
+      color: var(--cream); line-height: 1.1; margin-bottom: 24px;
+    }
+    .banner-title em { color: var(--accent); font-style: italic; }
+    .banner-sub { color: rgba(245,240,232,0.6); font-size: 0.95rem; line-height: 1.7; margin-bottom: 40px; }
+    .banner-img {
+      position: relative; overflow: hidden;
+      background: var(--bark);
+    }
+    .banner-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; mix-blend-mode: luminosity; }
+
+    /* TESTIMONIALS */
+    .testimonials {
+      padding: 0 60px 120px;
+    }
+    .testimonials .section-header { margin-bottom: 48px; }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    .tcard {
+      background: var(--white); padding: 36px 32px;
+      border-left: 3px solid var(--sand);
+      transition: border-color 0.3s;
+    }
+    .tcard:hover { border-color: var(--accent); }
+    .tcard-stars { color: var(--accent); font-size: 0.85rem; margin-bottom: 16px; letter-spacing: 2px; }
+    .tcard-text { font-size: 0.95rem; line-height: 1.75; color: var(--bark); font-style: italic; margin-bottom: 24px; }
+    .tcard-author { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--coal); font-weight: 500; }
+
+    /* NEWSLETTER */
+    .newsletter {
+      background: var(--sand); padding: 100px 60px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    .nl-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 2.8vw, 2.8rem); color: var(--coal); margin-bottom: 16px;
+    }
+    .nl-sub { color: var(--bark); font-size: 0.95rem; line-height: 1.7; }
+    .nl-form { display: flex; gap: 0; }
+    .nl-input {
+      flex: 1; padding: 16px 20px;
+      border: 1.5px solid var(--clay); border-right: none;
+      background: var(--white); font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; color: var(--coal); outline: none;
+    }
+    .nl-input::placeholder { color: var(--clay); }
+    .nl-submit {
+      background: var(--coal); color: var(--cream);
+      border: 1.5px solid var(--coal); padding: 16px 32px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+      letter-spacing: 0.12em; text-transform: uppercase; cursor: none;
+      transition: background 0.25s;
+    }
+    .nl-submit:hover { background: var(--accent); border-color: var(--accent); }
+    .nl-note { font-size: 0.72rem; color: var(--clay); margin-top: 12px; }
+
+    /* FOOTER */
+    footer {
+      background: var(--coal); padding: 80px 60px 40px;
+      color: rgba(245,240,232,0.5);
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px;
+      margin-bottom: 60px;
+    }
+    .footer-brand .nav-logo { color: var(--cream); display: block; margin-bottom: 16px; }
+    .footer-brand p { font-size: 0.88rem; line-height: 1.7; max-width: 260px; }
+    .footer-col h4 {
+      font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--clay); margin-bottom: 20px;
+    }
+    .footer-col a {
+      display: block; font-size: 0.88rem; color: rgba(245,240,232,0.5);
+      text-decoration: none; margin-bottom: 10px; transition: color 0.2s;
+    }
+    .footer-col a:hover { color: var(--cream); }
+    .footer-bottom {
+      border-top: 1px solid rgba(196,168,130,0.15); padding-top: 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.75rem;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--coal); color: var(--cream);
+      padding: 16px 28px; font-size: 0.82rem; letter-spacing: 0.05em;
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      z-index: 1000; border-left: 3px solid var(--accent);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
 </head>
 <body>
-    <P>welcome to the website</P>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" href="#">FORMA</a>
+  <ul class="nav-links">
+    <li><a href="#">Collections</a></li>
+    <li><a href="#">Living</a></li>
+    <li><a href="#">Lighting</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="cart-btn" onclick="openCart()">
+      Bag <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <p class="hero-eyebrow">New Collection — SS 2026</p>
+    <h1 class="hero-title">Crafted for<br><em>Quiet</em><br>Luxury</h1>
+    <p class="hero-sub">Furniture and objects designed for the considered home. Each piece made to outlast the moment.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="scrollToProducts()">Explore Collection</button>
+      <button class="btn-outline">Our Story</button>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">340+</div>
+        <div class="stat-label">Products</div>
+      </div>
+      <div>
+        <div class="stat-num">18k</div>
+        <div class="stat-label">Customers</div>
+      </div>
+      <div>
+        <div class="stat-num">12yr</div>
+        <div class="stat-label">Crafting</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-wrap">
+      <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=900&q=80" alt="Hero interior"/>
+    </div>
+    <div class="hero-badge">
+      <div class="badge-label">Season Offer</div>
+      <div class="badge-val">Up to 30% off</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item">Free Shipping Over $200 <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">Handcrafted Materials <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">30-Day Returns <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">Sustainably Sourced <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">New SS26 Pieces <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">Free Shipping Over $200 <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">Handcrafted Materials <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">30-Day Returns <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">Sustainably Sourced <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">New SS26 Pieces <span class="marquee-dot">✦</span></span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="featured" id="products">
+  <div class="section-header reveal">
+    <h2 class="section-title">Featured<br><span>Pieces</span></h2>
+    <a class="view-all" href="#">View All →</a>
+  </div>
+  <div class="products-grid" id="productsGrid">
+    <!-- Injected by JS -->
+  </div>
+</section>
+
+<!-- BANNER -->
+<div class="banner reveal">
+  <div class="banner-text">
+    <p class="banner-eyebrow">Limited Edition</p>
+    <h2 class="banner-title">The <em>Atelier</em><br>Collection</h2>
+    <p class="banner-sub">A curated series of one-of-a-kind objects made by independent artisans. Only 50 pieces per item.</p>
+    <button class="btn-primary">Shop Atelier</button>
+  </div>
+  <div class="banner-img">
+    <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="Atelier collection"/>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="section-header reveal">
+    <h2 class="section-title">What People<br><span>Are Saying</span></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="tcard reveal">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"The craftsmanship on my oak dining table is extraordinary. Every detail speaks of genuine care and mastery."</p>
+      <div class="tcard-author">— Miriam S., Oslo</div>
+    </div>
+    <div class="tcard reveal" style="transition-delay:0.1s">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"Finally a brand that values restraint. My apartment has never felt more like a home than with FORMA pieces."</p>
+      <div class="tcard-author">— Luca T., Milan</div>
+    </div>
+    <div class="tcard reveal" style="transition-delay:0.2s">
+      <div class="tcard-stars">★★★★★</div>
+      <p class="tcard-text">"Ordered the Arch lamp and it arrived perfectly packed, ahead of schedule. Beautifully made."</p>
+      <div class="tcard-author">— Amara D., Lagos</div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <div class="reveal">
+    <h2 class="nl-title">Stay in the Loop</h2>
+    <p class="nl-sub">New arrivals, private sales, and stories from our makers — delivered thoughtfully, never often.</p>
+  </div>
+  <div class="reveal">
+    <div class="nl-form">
+      <input class="nl-input" type="email" placeholder="your@email.com" id="nlEmail"/>
+      <button class="nl-submit" onclick="subscribe()">Subscribe</button>
+    </div>
+    <p class="nl-note">No spam. Unsubscribe anytime.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a class="nav-logo">FORMA</a>
+      <p>Objects for the considered home. Designed with restraint, built to endure.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a href="#">Living Room</a>
+      <a href="#">Bedroom</a>
+      <a href="#">Lighting</a>
+      <a href="#">Textiles</a>
+      <a href="#">Objects</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#">Our Story</a>
+      <a href="#">Artisans</a>
+      <a href="#">Sustainability</a>
+      <a href="#">Press</a>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a href="#">Shipping</a>
+      <a href="#">Returns</a>
+      <a href="#">Care Guide</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 FORMA. All rights reserved.</span>
+    <span>Privacy · Terms · Cookies</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ---- DATA ---- */
+  const products = [
+    { id:1, name:"Arch Floor Lamp", category:"Lighting", price:348, old:480, tag:"New", img:"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=700&q=80" },
+    { id:2, name:"Okar Side Table", category:"Living", price:195, old:null, tag:null, img:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80" },
+    { id:3, name:"Linen Throw", category:"Textiles", price:89, old:120, tag:"Sale", img:"https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&q=80" },
+    { id:4, name:"Walnut Tray", category:"Objects", price:64, old:null, tag:null, img:"https://images.unsplash.com/photo-1543285198-3af15c4592ce?w=500&q=80" },
+    { id:5, name:"Forma Vase", category:"Objects", price:112, old:null, tag:"Bestseller", img:"https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=500&q=80" },
+  ];
+
+  let cart = [];
+
+  /* ---- RENDER PRODUCTS ---- */
+  const grid = document.getElementById('productsGrid');
+  products.forEach((p, i) => {
+    grid.innerHTML += `
+      <div class="product-card reveal" style="transition-delay:${i*0.08}s">
+        <div class="card-img">
+          <img src="${p.img}" alt="${p.name}" loading="lazy"/>
+          ${p.tag ? `<span class="card-tag">${p.tag}</span>` : ''}
+          <button class="card-wishlist" id="wish-${p.id}" onclick="toggleWish(${p.id}, this)">♡</button>
+        </div>
+        <div class="card-body">
+          <div class="card-category">${p.category}</div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-footer">
+            <div class="card-price">$${p.price}${p.old ? `<s>$${p.old}</s>` : ''}</div>
+            <button class="add-btn" onclick="addToCart(${p.id})">Add to Bag</button>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  /* ---- CART ---- */
+  function addToCart(id) {
+    const p = products.find(x => x.id === id);
+    const existing = cart.find(x => x.id === id);
+    if (existing) existing.qty++;
+    else cart.push({ ...p, qty: 1 });
+    document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.qty, 0);
+    showToast(`"${p.name}" added to bag ✓`);
+  }
+
+  function openCart() {
+    if (!cart.length) { showToast('Your bag is empty'); return; }
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    showToast(`${cart.reduce((s,i)=>s+i.qty,0)} items — $${total} total`);
+  }
+
+  /* ---- WISHLIST ---- */
+  function toggleWish(id, btn) {
+    btn.classList.toggle('active');
+    btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+    showToast(btn.classList.contains('active') ? 'Added to wishlist' : 'Removed from wishlist');
+  }
+
+  /* ---- TOAST ---- */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ---- SUBSCRIBE ---- */
+  function subscribe() {
+    const v = document.getElementById('nlEmail').value;
+    if (!v || !v.includes('@')) { showToast('Please enter a valid email'); return; }
+    showToast('Welcome to FORMA ✓');
+    document.getElementById('nlEmail').value = '';
+  }
+
+  /* ---- SCROLL TO PRODUCTS ---- */
+  function scrollToProducts() {
+    document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /* ---- STICKY NAV ---- */
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  /* ---- REVEAL ON SCROLL ---- */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ---- CUSTOM CURSOR ---- */
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  function animateCursor() {
+    cur.style.transform = `translate(${mx - 5}px, ${my - 5}px)`;
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  document.querySelectorAll('button, a, input').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
+</script>
 </body>
 </html>
